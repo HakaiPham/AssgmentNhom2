@@ -119,8 +119,12 @@ namespace TMPro
             }
         }
 
+        private Camera GetM_Camera()
+        {
+            return m_Camera;
+        }
 
-        void LateUpdate()
+        void LateUpdate(Camera m_Camera)
         {
             if (TMP_TextUtilities.IsIntersectingRectTransform(m_TextComponent.rectTransform, Input.mousePosition, m_Camera))
             {
