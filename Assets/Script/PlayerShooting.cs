@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerShooting : MonoBehaviour
 {
@@ -10,18 +12,34 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private GameObject _Bullet;
     Player player;
     [SerializeField] private float _speedBullet;
+    [SerializeField] private TextMeshProUGUI _BulletBoxText;
+    [SerializeField] private TextMeshProUGUI _GunReloadText;
+    [SerializeField] private Image _GunImage;
+    [SerializeField]
+    private int bulletInBox = 30;
+    [SerializeField] private int _TimeGunReload;
+    bool CanReload;
+    [SerializeField] private GameObject _CooldownGunPanel;
+    bool _isReloading = false;
     void Start()
     {
         player = GetComponent<Player>();
+        _CooldownGunPanel.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
         float playerCooldownShoot = player.PlayerCooldownShooter();
-        Debug.Log("TimeCooldown: " + playerCooldownShoot);
-        if (Input.GetMouseButtonDown(0)&&playerCooldownShoot<=0) 
+        Debug.Log("Thời gian cooldown Script1 còn: " + player.PlayerCooldownShooter()
+            + "Thời gian cooldown Script2 còn: "+playerCooldownShoot);
+        bool pressMouse = Input.GetMouseButtonDown(0);
+        Debug.Log("PressMouse?: " + pressMouse);
+        bool isDead = player.PlayerIsDead();
+        if (pressMouse&&bulletInBox!=0) 
         {
+            if (isDead) return;
+            Debug.Log("TMDK");
             Ray ray = _maincamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
@@ -33,6 +51,21 @@ public class PlayerShooting : MonoBehaviour
                 PlayerShoot(direction);
             }
         }
+        else
+        {
+            Debug.Log("KTMDK");
+        }
+        //Tránh cho Hàm Update gọi Coroutine liên tục
+        if (Input.GetMouseButton(0) && bulletInBox > 0 && !_isReloading)
+        {
+            if(isDead) return;
+            StartCoroutine(GunBullet());
+        }
+        else if ((bulletInBox == 0 || Input.GetKeyDown(KeyCode.R)) && !_isReloading)
+        {
+            if (isDead) return;
+            StartCoroutine(GunBullet());
+        }
     }
     public void PlayerShoot(Vector3 direction)
     {
@@ -40,5 +73,46 @@ public class PlayerShooting : MonoBehaviour
         GameObject bullet = Instantiate(_Bullet, _tranformGun.position, Quaternion.identity);
         bullet.GetComponent<Rigidbody>().velocity = direction*_speedBullet;
         Destroy(bullet, 3f);
+    }
+    IEnumerator GunBullet()
+    {
+        //Đầu tiên sẽ có 30 viên đạn trong băng
+        //Sau khi bắn sẽ trừ số đạn còn lại
+        //Sau khi bắn hết đạn trong băng sẽ chạy thời gian reload đạn
+        //Súng sẽ chuyển sang màu đen
+        if (Input.GetMouseButton(0) && bulletInBox != 0)
+        {
+            if (bulletInBox == 0||_isReloading) yield break;
+            bulletInBox--;
+            bulletInBox = Mathf.Max(0, bulletInBox);
+            _BulletBoxText.text = "" + bulletInBox+"/" + "∞";
+            yield return null; //Chờ 1 frame để không bị gọi liên tục
+        }
+        else if ((bulletInBox == 0 || Input.GetKeyDown(KeyCode.R))&&!_isReloading)
+        {
+            _isReloading = true;
+            if (bulletInBox >= 30)
+            {
+                Debug.Log("Đạn đã đầy.");
+                yield break;
+            }
+            _CooldownGunPanel.SetActive(true);
+            _GunImage.color = Color.black;
+            for (int i = 0; i < 5; i++) // Ví dụ reload trong 3 giây
+            {
+                _TimeGunReload--;
+                _TimeGunReload = Mathf.Max(0, _TimeGunReload);
+                _GunReloadText.text = "" + _TimeGunReload;
+                yield return new WaitForSeconds(1f); // Chờ 1 giây mỗi lần
+            }
+            if (_TimeGunReload == 0)
+            {
+                _TimeGunReload = 5;//Đặt lại thời gian
+                bulletInBox = 30;
+                _CooldownGunPanel.SetActive(false);
+                _GunImage.color = Color.white;
+                _isReloading = false;
+            }
+        }
     }
 }

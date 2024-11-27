@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -12,14 +13,23 @@ public class Player : MonoBehaviour
     AnimatorStateInfo stateInfo;
     [SerializeField] private float playerShooterReset;
     float playerShooterCooldown;
+    [SerializeField] private int _MaxHp;
+    [SerializeField] private int _CurrentHp;
+    bool isDead = false;
+    [SerializeField] private GameObject _PanelDead;
+    [SerializeField] private Slider _SliderHealth;
     void Start()
     {
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
+        playerShooterCooldown = 0;
+        _CurrentHp = _MaxHp;
+        _SliderHealth.maxValue = _MaxHp;
     }
 
     private void Update()
     {
+        if (currentState == CharacterState.Dead) return;
         playerShooterCooldown -= Time.deltaTime;
         if (!isAttack&&Input.GetMouseButtonDown(0))
         {
@@ -45,6 +55,7 @@ public class Player : MonoBehaviour
             }
        }
         characterController.Move(movement*Time.deltaTime);
+        if(Input.GetKeyDown(KeyCode.H)&&!isDead) { TakeDame(10); }
     }
     public enum CharacterState 
     {
@@ -103,5 +114,22 @@ public class Player : MonoBehaviour
     public float PlayerCooldownShooter()
     {
         return playerShooterCooldown;
+    }
+    public void TakeDame(int dame)
+    {
+        _CurrentHp -= dame;
+        _CurrentHp = Mathf.Max(0, _CurrentHp);
+        _SliderHealth.value = _CurrentHp;
+        if(_CurrentHp <= 0)
+        {
+            isDead = true;
+            ChangeState(CharacterState.Dead);
+            _PanelDead.SetActive(true);
+            Debug.Log("Character Die");
+        }
+    }
+    public bool PlayerIsDead()
+    {
+        return isDead;
     }
 }
