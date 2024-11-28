@@ -28,15 +28,19 @@ public class PlayerShooting : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
+    {
+        PlayerShooter();
+    }
+    public void PlayerShooter()
     {
         float playerCooldownShoot = player.PlayerCooldownShooter();
         Debug.Log("Thời gian cooldown Script1 còn: " + player.PlayerCooldownShooter()
-            + "Thời gian cooldown Script2 còn: "+playerCooldownShoot);
-        bool pressMouse = Input.GetMouseButtonDown(0);
-        Debug.Log("PressMouse?: " + pressMouse);
+            + "Thời gian cooldown Script2 còn: " + playerCooldownShoot);
+        //  bool pressMouse = Input.GetMouseButtonDown(0);
+        // Debug.Log("PressMouse?: " + pressMouse);
         bool isDead = player.PlayerIsDead();
-        if (pressMouse&&bulletInBox!=0) 
+        if (Input.GetMouseButtonDown(0) && bulletInBox != 0)
         {
             if (isDead) return;
             Debug.Log("TMDK");
@@ -48,7 +52,10 @@ public class PlayerShooting : MonoBehaviour
                 Vector3 target = hit.point;
                 Vector3 direction = (target - _tranformGun.position).normalized;
                 transform.rotation = Quaternion.LookRotation(direction);//Xoay Player theo hướng bắn
-                PlayerShoot(direction);
+                if(playerCooldownShoot <= 0)
+                {
+                    CreateBullet(direction);
+                }
             }
         }
         else
@@ -58,7 +65,7 @@ public class PlayerShooting : MonoBehaviour
         //Tránh cho Hàm Update gọi Coroutine liên tục
         if (Input.GetMouseButton(0) && bulletInBox > 0 && !_isReloading)
         {
-            if(isDead) return;
+            if (isDead) return;
             StartCoroutine(GunBullet());
         }
         else if ((bulletInBox == 0 || Input.GetKeyDown(KeyCode.R)) && !_isReloading)
@@ -67,7 +74,7 @@ public class PlayerShooting : MonoBehaviour
             StartCoroutine(GunBullet());
         }
     }
-    public void PlayerShoot(Vector3 direction)
+    public void CreateBullet(Vector3 direction)
     {
         Debug.Log("Firing towards: " + direction);
         GameObject bullet = Instantiate(_Bullet, _tranformGun.position, Quaternion.identity);
@@ -86,16 +93,16 @@ public class PlayerShooting : MonoBehaviour
             bulletInBox--;
             bulletInBox = Mathf.Max(0, bulletInBox);
             _BulletBoxText.text = "" + bulletInBox+"/" + "∞";
-            yield return null; //Chờ 1 frame để không bị gọi liên tục
+            yield return new WaitForSeconds(1f); //Chờ 1 frame để không bị gọi liên tục
         }
         else if ((bulletInBox == 0 || Input.GetKeyDown(KeyCode.R))&&!_isReloading)
         {
-            _isReloading = true;
             if (bulletInBox >= 30)
             {
                 Debug.Log("Đạn đã đầy.");
                 yield break;
             }
+            _isReloading = true;
             _CooldownGunPanel.SetActive(true);
             _GunImage.color = Color.black;
             for (int i = 0; i < 5; i++) // Ví dụ reload trong 3 giây
@@ -109,6 +116,7 @@ public class PlayerShooting : MonoBehaviour
             {
                 _TimeGunReload = 5;//Đặt lại thời gian
                 bulletInBox = 30;
+                _BulletBoxText.text = "" + bulletInBox + "/" + "∞";
                 _CooldownGunPanel.SetActive(false);
                 _GunImage.color = Color.white;
                 _isReloading = false;
