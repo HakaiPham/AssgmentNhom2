@@ -132,4 +132,11 @@ public class Player : MonoBehaviour
     {
         return isDead;
     }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "CarMachine")
+        {
+            Destroy(other.gameObject);
+        }
+    }
 }
