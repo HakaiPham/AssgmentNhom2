@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,7 @@ public class Player : MonoBehaviour
     bool isDead = false;
     [SerializeField] private GameObject _PanelDead;
     [SerializeField] private Slider _SliderHealth;
+    public QuestNV2 _QuestNV2;
     void Start()
     {
         animator = GetComponent<Animator>();
@@ -136,6 +138,7 @@ public class Player : MonoBehaviour
     {
         if (other.tag == "CarMachine")
         {
+            _QuestNV2.MissionProgress();
             Destroy(other.gameObject);
         }
     }
