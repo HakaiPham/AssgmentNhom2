@@ -45,7 +45,7 @@ public class EnBeha : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        cooldownTimer -= Time.deltaTime;
+        cooldownTimer += Time.deltaTime;
         if (curState == EnemyState.Dead) return;
         // Tính khoản cách giữa Enemy và Player
         float distance = Vector3.Distance(transform.position, target.position);
@@ -83,7 +83,7 @@ public class EnBeha : MonoBehaviour
         }
 
         // Tấn công Player khi trong phạm vi tấn công
-        if (distance <= attackDistance && isAttacking == false) 
+        if (distance <= attackDistance) 
         {
             ChangeState(EnemyState.Attack);
         }
@@ -139,7 +139,6 @@ public class EnBeha : MonoBehaviour
 
     private void Attack()
     {
-        isAttacking = true;
         demonAttack.Fire();
         animator.SetTrigger("Attack");
     }
@@ -165,8 +164,14 @@ public class EnBeha : MonoBehaviour
 
     IEnumerator Shot()
     {
-        Attack();
+        if (cooldownTimer > cooldown && isAttacking == false)
+        {
+            isAttacking = true;
+            Attack();
+            cooldownTimer = 0f;
+            yield return new WaitForSeconds(cooldown);
+        }
         isAttacking = false;
-        yield return new WaitForSeconds(cooldown);
+        yield return null;
     }
 }
