@@ -40,6 +40,7 @@ public class Enemy : MonoBehaviour
         curHP = maxHP;
         originalPosition = transform.position;
         isAttacking = false;
+        cooldownTimer = cooldown;
     }
 
     // Update is called once per frame
@@ -127,7 +128,7 @@ public class Enemy : MonoBehaviour
                 break;
             
             case EnemyState.Attack:
-                if (cooldownTimer >= cooldown && isAttacking == false) Attack();
+                if (cooldownTimer >= cooldown && isAttacking == false) StartCoroutine(Shot());
                 break;
             
             case EnemyState.Dead: 
@@ -160,6 +161,18 @@ public class Enemy : MonoBehaviour
         animator.SetTrigger("EndAttack");
     }
     
+    IEnumerator Shot()
+    {
+        if (cooldownTimer > cooldown && isAttacking == false)
+        {
+            isAttacking = true;
+            Attack();
+            cooldownTimer = 0f;
+            yield return new WaitForSeconds(cooldown);
+        }
+        isAttacking = false;
+        yield return null;
+    }
     
 }
 
