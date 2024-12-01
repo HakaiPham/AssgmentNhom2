@@ -13,10 +13,10 @@ public class DemondBehavior : MonoBehaviour
 
     [SerializeField] private Vector3 originalPosition;
     [SerializeField] Animator animator;
-
+    [SerializeField] DemonAttack demonattack;
     
     public int maxHP, curHP;
-    public AttackZone atkZone;
+    //public AttackZone atkZone;
     private bool isAttacking = false;
     // Start is called before the first frame update
     void Start()
@@ -35,22 +35,25 @@ public class DemondBehavior : MonoBehaviour
         
         // khoan cach tu player -> enemy
         var distance = Vector3.Distance(transform.position, target.position);
-        if (distance <= chaseRadius)
-        {
+        /*if (distance <= chaseRadius)
+        {*/
             agent.SetDestination(target.position);
-        }
-
+        //}
+            
         if (distance <= attackDistance && isAttacking == false)
         {
+            Debug.Log("Fire"+"|" +distance+ "|"+isAttacking + "|" + attackDistance);
             isAttacking = true;
             animator.SetTrigger("Attack");
             agent.isStopped = true;
+            demonattack.Fire();
+            
         }
-        
+        Debug.Log("Fire"+"|" +distance+ "|"+isAttacking + "|" + attackDistance);
         // khoan cach giua player va enemy qua xa
 
         
-        if (chasedDistance <= chaseRadius && distance >= maxDistance)
+        /*if (chasedDistance <= chaseRadius && distance >= maxDistance)
         {
             agent.SetDestination(originalPosition);
         }
@@ -58,12 +61,12 @@ public class DemondBehavior : MonoBehaviour
         if (distance > chaseRadius || chasedDistance > maxDistance)
         {
             agent.SetDestination(originalPosition);
-        }
+        }*/
         
         
         float speed = agent.velocity.magnitude;
         animator.SetFloat("Speed", speed);  
-        Debug.Log(speed);
+        //Debug.Log(speed);
     }
     
     public enum EnemyState
@@ -112,13 +115,4 @@ public class DemondBehavior : MonoBehaviour
         }
     }
     
-    public void BeginDamage()
-    {
-        atkZone.beginDamage();
-    }
-
-    public void EndDamage()
-    {
-        atkZone.endDamage();
-    }
 }
