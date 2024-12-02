@@ -49,7 +49,7 @@ public class PlayerShooting : MonoBehaviour
                 Vector3 direction = (target - _tranformGun.position).normalized;
                 transform.rotation = Quaternion.LookRotation(direction);//Xoay Player theo hướng bắn
                 bool playerCooldownShoot = player.CanAttack();
-                if (playerCooldownShoot)
+                if (playerCooldownShoot&&!_isReloading)
                 {
                     CreateBullet(direction);
                 }
@@ -108,7 +108,7 @@ public class PlayerShooting : MonoBehaviour
                 yield break;
             }
         }
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0)&&!_isReloading)
         {
             bulletInBox--;
             bulletInBox = Mathf.Max(0, bulletInBox);
