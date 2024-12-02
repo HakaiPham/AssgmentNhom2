@@ -21,6 +21,7 @@ public class Player : MonoBehaviour
     public ReloadBulletManager _ReloadBulletManager;
     [SerializeField] private GameObject _VFXGunFire;
     PlayerShooting playerShooting;
+    [SerializeField] private Quest1 _Quest1;
     void Start()
     {
         animator = GetComponent<Animator>();
@@ -65,6 +66,10 @@ public class Player : MonoBehaviour
             }
        }
         characterController.Move(movement*Time.deltaTime);
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            TakeDame(10);
+        }
     }
     public enum CharacterState 
     {
@@ -143,6 +148,19 @@ public class Player : MonoBehaviour
         if (other.tag == "CarMachine")
         {
             _QuestNV2.MissionProgress();
+            Destroy(other.gameObject);
+        }
+        else if(other.tag == "Herb")
+        {
+            _Quest1.MissionProgress();
+            Destroy(other.gameObject);
+        }
+        if(other.tag == "FirstAid")
+        {
+            Debug.Log("Đã va chạm");
+            _CurrentHp += 20;
+            _CurrentHp = Mathf.Min(_CurrentHp, 100);
+            _SliderHealth.value = _CurrentHp;
             Destroy(other.gameObject);
         }
     }

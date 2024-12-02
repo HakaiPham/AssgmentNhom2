@@ -7,14 +7,16 @@ TagManager:
   - Wall
   - CarMachine
   - Enemy
+  - Herb
+  - FirstAid
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Quest2
   - Water
   - UI
-  - 
+  - Player
   - 
   - 
   - 
