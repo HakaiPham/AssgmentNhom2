@@ -18,6 +18,8 @@ public class QuestNV2 : MonoBehaviour
     [SerializeField] private GameObject _PanelProgress;
     private List<int> spawnedIndexes = new List<int>(); // Danh sách các index đã spawn
     private bool _HasTriggered = false;//Biến để đảm bảo chỉ va chạm 1 lần
+    [SerializeField] private Image _ImageFilleSlider;
+    [SerializeField] private int _WaitItemSpawn = 30;
     void Start()
     {
         StartCoroutine(Quest());
@@ -78,7 +80,8 @@ public class QuestNV2 : MonoBehaviour
             }
 
             // Thêm một chút delay trước khi tạo object tiếp theo (nếu cần)
-            yield return new WaitForSeconds(1f);
+             yield return new WaitForSeconds(_WaitItemSpawn);
+            Debug.Log("Đã Spawn");
         }
         Debug.Log("All items have been spawned.");
     }
@@ -90,17 +93,17 @@ public class QuestNV2 : MonoBehaviour
         switch (random)
         {
             case 0:
-                randomPosition = Random.Range(436f, 489.8f);
-                return new Vector3(randomPosition, 0.2f, 391.7f);
+                randomPosition = Random.Range(353f, 372.2f);
+                return new Vector3(randomPosition, 0.87f, 394.3f);
             case 1:
-                randomPosition = Random.Range(359.9f, 324f);
-                return new Vector3(400.7f, 0.2f, randomPosition);
+                randomPosition = Random.Range(352.4f, 379.7f);
+                return new Vector3(402.27f, 0.87f, randomPosition);
             case 2:
-                randomPosition = Random.Range(365.1f, 328.1f);
-                return new Vector3(randomPosition, 0.2f, 391.7f);
+                randomPosition = Random.Range(431.4f, 442.22f);
+                return new Vector3(randomPosition, 0.87f, 394.3f);
             case 3:
-                randomPosition = Random.Range(421.2f, 452.1f);
-                return new Vector3(400.7f, 0.2f, randomPosition);
+                randomPosition = Random.Range(426f, 447.4f);
+                return new Vector3(400.5f, 0.87f, randomPosition);
             default:
                 Debug.LogError("Random value out of range: " + random);
                 return Vector3.zero; // Giá trị mặc định
@@ -121,6 +124,14 @@ public class QuestNV2 : MonoBehaviour
             _PanelProgress.SetActive(true);
             while (true)
             {
+                if(_WaitFixCarProgress == 30)
+                {
+                    _ImageFilleSlider.color = Color.yellow;
+                }
+                else if (_WaitFixCarProgress == 50)
+                {
+                    _ImageFilleSlider.color = Color.red;
+                }
                 _WaitFixCarProgress+=1;
                 _WaitFixCarProgress = Mathf.Max(0,_WaitFixCarProgress);
                 _SliderWaitFixCar.value = _WaitFixCarProgress;

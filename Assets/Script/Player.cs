@@ -12,34 +12,42 @@ public class Player : MonoBehaviour
     [SerializeField] private CharacterController characterController;
     bool isAttack=false;
     AnimatorStateInfo stateInfo;
-    [SerializeField] private float playerShooterReset;
-    float playerShooterCooldown;
     [SerializeField] private int _MaxHp;
     [SerializeField] private int _CurrentHp;
     bool isDead = false;
     [SerializeField] private GameObject _PanelDead;
     [SerializeField] private Slider _SliderHealth;
     public QuestNV2 _QuestNV2;
+    public ReloadBulletManager _ReloadBulletManager;
+    [SerializeField] private GameObject _VFXGunFire;
+    PlayerShooting playerShooting;
     void Start()
     {
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
-        playerShooterCooldown = 0;
         _CurrentHp = _MaxHp;
         _SliderHealth.maxValue = _MaxHp;
+        _VFXGunFire.SetActive(false);
+        playerShooting = GetComponent<PlayerShooting>();
     }
 
     private void Update()
     {
         if (currentState == CharacterState.Dead) return;
-        playerShooterCooldown -= Time.deltaTime;
         if (!isAttack&&Input.GetMouseButtonDown(0))
         {
-            if (playerShooterCooldown <= 0)
+            bool reloadBulletScript = _ReloadBulletManager.CheckDKReload();
+            bool checkGunIsLoad = playerShooting.CheckGunIsReload();
+            if (reloadBulletScript)
             {
+                Debug.Log("Đã khởi chạy");
                 isAttack = true;
+                if (!checkGunIsLoad)
+                {
+                    _VFXGunFire.SetActive(true);
+                }
                 ChangeState(CharacterState.Attack);
-                playerShooterCooldown = playerShooterReset;
+                _ReloadBulletManager.ResetTimeReload();
             }
         }
        if(currentState == CharacterState.Normal) { 
@@ -57,7 +65,6 @@ public class Player : MonoBehaviour
             }
        }
         characterController.Move(movement*Time.deltaTime);
-        if(Input.GetKeyDown(KeyCode.H)&&!isDead) { TakeDame(10); }
     }
     public enum CharacterState 
     {
@@ -111,11 +118,8 @@ public class Player : MonoBehaviour
     {
         animator.SetBool("Attack", false);
         isAttack = false;
+        _VFXGunFire.SetActive(false);
         ChangeState(CharacterState.Normal);
-    }
-    public float PlayerCooldownShooter()
-    {
-        return playerShooterCooldown;
     }
     public void TakeDame(int dame)
     {
@@ -141,5 +145,9 @@ public class Player : MonoBehaviour
             _QuestNV2.MissionProgress();
             Destroy(other.gameObject);
         }
+    }
+    public bool CanAttack()
+    {
+        return isAttack;
     }
 }
