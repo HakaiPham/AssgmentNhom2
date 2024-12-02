@@ -15,7 +15,6 @@ public class AttackZone : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
         atkZone.enabled = false;
     }
 
@@ -27,11 +26,6 @@ public class AttackZone : MonoBehaviour
             if (other.tag == "Player")
             {
                 //other.GetComponent<PlayerMotor>().TakeDamage(damage);
-            }
-
-            if (other.tag == "enemy")
-            {
-                //other.GetComponent<Enemy>().TakeDamage(damage);
             }
             
         }
@@ -45,11 +39,6 @@ public class AttackZone : MonoBehaviour
             if (other.tag == "Player")
             {
                 //other.GetComponent<PlayerMotor>().TakeDamage(damage);
-            }
-
-            if (other.tag == "enemy")
-            {
-                //other.GetComponent<Enemy>().TakeDamage(damage);
             }
             
         }

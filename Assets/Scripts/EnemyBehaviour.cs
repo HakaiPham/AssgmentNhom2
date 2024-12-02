@@ -5,123 +5,174 @@ using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
-    [SerializeField] private NavMeshAgent agent;
-    [SerializeField] Transform target;
-    [SerializeField] float chaseRadius = 10f;
-    [SerializeField] float maxDistance = 50f;
-    [SerializeField] float attackDistance = 5f;
-
-    [SerializeField] private Vector3 originalPosition;
-    [SerializeField] Animator animator;
-
+     // Entity essential
+    private NavMeshAgent agent;
+    private Animator animator;
+    private DemonAttack demonAttack;
+    private Vector3 originalPosition;
     
-    public int maxHP, curHP;
-    public AttackZone atkZone;
-    private bool isAttacking = false;
+    
+    // SerializeField
+    [SerializeField] Transform target;
+
+    // Entity property
+    //public
+    public int curHP;
+    public int maxHP;
+    public float chaseDistance;
+    public float maxChaseDistance;
+    public float attackDistance;
+    private float cooldownTimer;
+    //private
+    
+    private bool isAttacking;
+    public float cooldown;
+    
     // Start is called before the first frame update
     void Start()
     {
+        // GetComponent
+        agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
+        demonAttack = GetComponent<DemonAttack>();
+        
+        // Reset giá trị
         curHP = maxHP;
         originalPosition = transform.position;
+        isAttacking = false;
+        cooldownTimer = cooldown;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-        if (currentState == EnemyState.Dead) return;
-        // khoan cach tu vi tri hen tai den vi tri ban dau cua enemy
+        cooldownTimer += Time.deltaTime;
+        if (curState == EnemyState.Dead) return;
+        // Tính khoản cách giữa Enemy và Player
+        float distance = Vector3.Distance(transform.position, target.position);
         var chasedDistance = Vector3.Distance(transform.position, originalPosition);
+        Debug.unityLogger.Log(string.Format("Distance: {0}", distance));
         
-        // khoan cach tu player -> enemy
-        var distance = Vector3.Distance(transform.position, target.position);
-        if (distance <= chaseRadius)
+        if (chasedDistance <= chaseDistance && distance >= maxChaseDistance)
         {
+            agent.SetDestination(originalPosition);
+            ChangeState(EnemyState.Run);
+        }
+
+        if (distance > chaseDistance || chasedDistance > maxChaseDistance)
+        {
+            agent.SetDestination(originalPosition);
+            ChangeState(EnemyState.Run);
+        }
+
+        
+
+        // Duổi theo PLayer trong phạm vi cho phép
+        if (distance <= chaseDistance)
+        {
+            
+            //transform.localRotation = Quaternion.Euler(0f,transform.localRotation.y,transform.localRotation.z);
             agent.SetDestination(target.position);
-        }
-
-        if (distance <= attackDistance && isAttacking == false)
-        {
-            isAttacking = true;
-            animator.SetTrigger("Attack");
-            agent.isStopped = true;
+            ChangeState(EnemyState.Run);
         }
         
-        // khoan cach giua player va enemy qua xa
-
-        
-        if (chasedDistance <= chaseRadius && distance >= maxDistance)
+        // Quay về vị trí cũ khi Player ở quá xa
+        if (distance > maxChaseDistance)
         {
             agent.SetDestination(originalPosition);
+            ChangeState(EnemyState.Run);
         }
 
-        if (distance > chaseRadius || chasedDistance > maxDistance)
+        // Tấn công Player khi trong phạm vi tấn công
+        if (distance <= attackDistance) 
         {
-            agent.SetDestination(originalPosition);
+            ChangeState(EnemyState.Attack);
         }
-        
-        
-        float speed = agent.velocity.magnitude;
-        animator.SetFloat("Speed", speed);  
-        Debug.Log(speed);
+        gameObject.transform.LookAt(agent.destination);
     }
     
-    public enum EnemyState
+    private enum EnemyState
     {
-        Normal, Attack, Dead
-    }
-    
-    public EnemyState currentState;
-
-    public void EndAttack()
-    {
-        animator.SetTrigger("EndAttack");
-        isAttacking = false;
-        agent.isStopped = false;
+        Normal, Run, Attack, Dead,
     }
 
-    public void ChangeState(EnemyState newState)
+    private EnemyState curState;
+
+    // Chuyển state hành vi
+    private void ChangeState(EnemyState newState)
     {
-        switch (currentState)
+        switch (curState)
         {
-            case EnemyState.Normal: break;
-            case EnemyState.Attack: break;
-            case EnemyState.Dead: break;
+            case EnemyState.Normal:
+                break;
+            
+            case EnemyState.Run:
+                break;
+            
+            case EnemyState.Attack: 
+                break;
+            
+            case EnemyState.Dead:
+                break;
+            
         }
 
         switch (newState)
         {
-            case EnemyState.Normal: break;
-            case EnemyState.Attack: break;
+            case EnemyState.Normal:
+                
+                break;
+            
+            case EnemyState.Run:
+                Run();
+                break;
+            
+            case EnemyState.Attack:
+                if (cooldownTimer >= cooldown && isAttacking == false) StartCoroutine(Shot());
+                break;
+            
             case EnemyState.Dead: 
-                animator.SetTrigger("Dead");
-                Destroy(gameObject, 2f); 
+                 Dead();
                 break;
         }
-   
-        currentState = newState;
+        curState = newState;
     }
 
-    public void TakeDamage(int damage)
+    private void Attack()
     {
-        curHP -= damage;
-        curHP = Mathf.Max(0, curHP);
-        if (curHP <= 0)
+        animator.SetTrigger("Attack");
+    }
+
+    private void Run()
+    {
+        float speed = agent.velocity.magnitude;
+        animator.SetFloat("Speed", speed);
+    }
+
+    private void Dead()
+    {
+        animator.SetTrigger("Dead");
+    }
+
+    public void EndAttack()
+    {
+        
+        isAttacking = false;
+        animator.SetTrigger("EndAttack");
+    }
+    
+    IEnumerator Shot()
+    {
+        if (cooldownTimer > cooldown && isAttacking == false)
         {
-            ChangeState(EnemyState.Dead);
+            isAttacking = true;
+            Attack();
+            cooldownTimer = 0f;
+            yield return new WaitForSeconds(cooldown);
         }
+        isAttacking = false;
+        yield return null;
     }
-    
-    public void BeginDamage()
-    {
-        atkZone.beginDamage();
-    }
-
-    public void EndDamage()
-    {
-        atkZone.endDamage();
-    }
-    
     
 }
 

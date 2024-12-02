@@ -15,6 +15,7 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/AttackZone.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/DemonAttack.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/EnemyBehaviour.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
@@ -95,6 +96,11 @@
       <workItem from="1732518464278" duration="5000" />
       <workItem from="1732518502270" duration="653000" />
       <workItem from="1732774807814" duration="401000" />
+      <workItem from="1732976439462" duration="5000" />
+      <workItem from="1732977414006" duration="1284000" />
+      <workItem from="1732989152056" duration="2000" />
+      <workItem from="1732989166223" duration="5859000" />
+      <workItem from="1733027033792" duration="12871000" />
     </task>
     <servers />
   </component>
