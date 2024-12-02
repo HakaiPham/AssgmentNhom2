@@ -20,11 +20,18 @@ public class QuestNV2 : MonoBehaviour
     private bool _HasTriggered = false;//Biến để đảm bảo chỉ va chạm 1 lần
     [SerializeField] private Image _ImageFilleSlider;
     [SerializeField] private int _WaitItemSpawn = 30;
+    bool isfinishedMission = false;
+    [SerializeField] private Quest1 _Quest1;
+    [SerializeField]
+    private GameObject _PanelText2;
+    [SerializeField] private Rigidbody rb; 
     void Start()
     {
-        StartCoroutine(Quest());
-        _SliderWaitFixCar.maxValue = 60;
+        _PanelText2.SetActive(true);
         _PanelProgress.SetActive(false);
+        StartCoroutine(Quest());
+        rb = GetComponent<Rigidbody>();
+        rb.isKinematic = false;
     }
 
     // Update is called once per frame
@@ -114,6 +121,10 @@ public class QuestNV2 : MonoBehaviour
         _QuantityCarMachine += 1;
         _QuantityCarMachine= Mathf.Max(0,_QuantityCarMachine);
         _QuantityText.text = "- Thu Thập 6 phụ kiện xe: "+_QuantityCarMachine +" / 6";
+        if (_QuantityCarMachine == 6)
+        {
+            rb.isKinematic = false;
+        }
         return _QuantityCarMachine;
     }
     IEnumerator WaitCarFixed()
@@ -138,6 +149,7 @@ public class QuestNV2 : MonoBehaviour
                 yield return new WaitForSeconds(1f);
                 if(_WaitFixCarProgress >= 60)
                 {
+                    isfinishedMission = true;
                     break;
                 }
             }
@@ -146,8 +158,9 @@ public class QuestNV2 : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         if (_HasTriggered) return;
-        if (collision.gameObject.CompareTag("Player")&& _QuantityCarMachine == 6)
+        if (collision.gameObject.CompareTag("Player") && _QuantityCarMachine == 6)
         {
+            rb.isKinematic = true;
             _HasTriggered = true;
             Debug.Log("Đã va chạm");
             // Bắt đầu logic xử lý (không phụ thuộc việc thoát khỏi vùng va chạm).
@@ -156,5 +169,9 @@ public class QuestNV2 : MonoBehaviour
                 StartCoroutine(WaitCarFixed());
             }
         }
+    }
+    public bool CheckProgressMission()
+    {
+        return isfinishedMission;
     }
 }
