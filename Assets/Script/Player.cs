@@ -19,57 +19,86 @@ public class Player : MonoBehaviour
     [SerializeField] private Slider _SliderHealth;
     public QuestNV2 _QuestNV2;
     public ReloadBulletManager _ReloadBulletManager;
-    [SerializeField] private GameObject _VFXGunFire;
     PlayerShooting playerShooting;
     [SerializeField] private Quest1 _Quest1;
+    AudioSource _AudioSource;
+    public AudioClip _SoundGun;
+    public AudioClip _SoundWalk;
+    bool _isStartSound = false;
+    [SerializeField] private GameObject _VFXGunFire;
+    public TimeLineStory _timeLineStory; 
     void Start()
     {
+        
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         _CurrentHp = _MaxHp;
         _SliderHealth.maxValue = _MaxHp;
-        _VFXGunFire.SetActive(false);
         playerShooting = GetComponent<PlayerShooting>();
+        _AudioSource = GetComponent<AudioSource>();
+        _VFXGunFire.SetActive(false);
+
     }
 
     private void Update()
     {
-        if (currentState == CharacterState.Dead) return;
-        if (!isAttack&&Input.GetMouseButtonDown(0))
+        bool checkTimeLine = _timeLineStory.CheckTimeLineStart();
+        if (checkTimeLine)
         {
-            bool reloadBulletScript = _ReloadBulletManager.CheckDKReload();
-            bool checkGunIsLoad = playerShooting.CheckGunIsReload();
-            if (reloadBulletScript)
-            {
-                Debug.Log("Đã khởi chạy");
-                isAttack = true;
-                if (!checkGunIsLoad)
-                {
-                    _VFXGunFire.SetActive(true);
-                }
-                ChangeState(CharacterState.Attack);
-                _ReloadBulletManager.ResetTimeReload();
-            }
+
+            return;
         }
-       if(currentState == CharacterState.Normal) { 
+        if (currentState == CharacterState.Dead) return;
+
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Attack();
+        }
+        if (currentState == CharacterState.Normal)
+        {
             MoveSpeed();
-       }
-       else if(currentState == CharacterState.Attack)
-       {
+        }
+        else if (currentState == CharacterState.Attack)
+        {
+            // Khóa chuyển động trong trạng thái tấn công
+            // Kiểm tra trạng thái Animation Attack
             stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-            // Lấy thông tin clip đang chạy trong state
-            AnimatorClipInfo[] clipInfos = animator.GetCurrentAnimatorClipInfo(0);
-            Debug.Log("Animation đã lấy là: "+clipInfos[0].clip.name);
-            if (stateInfo.IsName("Attack"))
+
+            if (stateInfo.IsName("Attack")&&stateInfo.normalizedTime>=1)
             {
                 EndAttack();
             }
-       }
-        characterController.Move(movement*Time.deltaTime);
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            TakeDame(10);
         }
+
+        // Di chuyển nhân vật
+        characterController.Move(movement * Time.deltaTime);
+    }
+    public void Attack()
+    {
+        // Kiểm tra tất cả điều kiện cần thiết để bắn
+        bool canReload = _ReloadBulletManager.CheckDKReload();
+        bool gunIsReloaded = playerShooting.CheckGunIsReload();
+        Debug.Log("Can Reload: " + canReload);
+        if (canReload)
+        {
+            Debug.Log("TMDK");
+            isAttack = true;
+            Debug.Log("Gun Is Reload: " + gunIsReloaded);
+            if (!gunIsReloaded)
+            {
+                _VFXGunFire.SetActive(true);
+                _AudioSource.PlayOneShot(_SoundGun);
+                StartCoroutine(OffVFX());
+            }
+            ChangeState(CharacterState.Attack);
+            _ReloadBulletManager.ResetTimeReload();
+        }
+    }
+    IEnumerator OffVFX()
+    {
+        yield return new WaitForSeconds(0.5f);
+        _VFXGunFire.SetActive(false);
     }
     public enum CharacterState 
     {
@@ -80,7 +109,7 @@ public class Player : MonoBehaviour
     {
         var horizontalInput = Input.GetAxis("Horizontal");
         var verticalInput = Input.GetAxis("Vertical");
-        if (currentState!=CharacterState.Normal)
+        if (currentState != CharacterState.Normal)
         {
             Debug.Log("Finished!");
             return;
@@ -95,15 +124,22 @@ public class Player : MonoBehaviour
 
         movement = (forward * verticalInput + right * horizontalInput).normalized * speed;
 
-
+        bool _CheckHitCollider = playerShooting.CheckHitColliderEnemy();
         // Xoay hướng nhân vật
-        if (movement.magnitude > 0)
+        if (movement.magnitude > 0 && !Input.GetMouseButtonDown(0))//ưu tiên việc xoay nhân vật khi nhân vật di chuyển
+            //không thì xoay theo hướng bắn
         {
+            Quaternion toRotation = Quaternion.LookRotation(movement);
+            transform.rotation = toRotation;
             animator.SetBool("Run", true);
-            transform.rotation = Quaternion.LookRotation(movement);
+            if (!_AudioSource.isPlaying)
+            {
+                _AudioSource.PlayOneShot(_SoundWalk);
+            }
         }
         else if(movement.magnitude == 0)
         {
+            _AudioSource.Stop();
             animator.SetBool("Run", false);
         }
     }
@@ -113,7 +149,11 @@ public class Player : MonoBehaviour
         {
             case CharacterState.Normal:break;
             case CharacterState.Attack:
-                animator.SetBool("Attack",true);
+                if (animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+                {
+                    animator.ResetTrigger("EndAttack");
+                }
+                animator.SetTrigger("Attack");
                 break;
             case CharacterState.Dead: break;
         }
@@ -121,9 +161,8 @@ public class Player : MonoBehaviour
     }
     public void EndAttack()
     {
-        animator.SetBool("Attack", false);
+        animator.SetTrigger("EndAttack");
         isAttack = false;
-        _VFXGunFire.SetActive(false);
         ChangeState(CharacterState.Normal);
     }
     public void TakeDame(int dame)

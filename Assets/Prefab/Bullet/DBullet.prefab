@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6648738679045299347}
   - component: {fileID: 7595962566264528297}
+  - component: {fileID: 880081796192104064}
   m_Layer: 0
   m_Name: DBullet
   m_TagString: Untagged
@@ -60,6 +61,29 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!136 &880081796192104064
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2235928550089382813}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &9047371542755845275
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -79,6 +103,22 @@ PrefabInstance:
     - target: {fileID: -4391009826084840758, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
       propertyPath: m_AngularDrag
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1025603746567214427, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    - target: {fileID: 1025603746567214427, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
+      propertyPath: m_RenderMode
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1235992055006175848, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1722088143635787004, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2216287268232204523, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
       propertyPath: m_LocalScale.y
@@ -128,6 +168,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -0.112
       objectReference: {fileID: 0}
+    - target: {fileID: 5774261255154608217, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
+      propertyPath: ShapeModule.radius.value
+      value: 0.1231537
+      objectReference: {fileID: 0}
+    - target: {fileID: 6890711030329499387, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 476ed4019fad5624f81ccfaf3186d4cc, type: 2}
     - target: {fileID: 7236611418992985152, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
       propertyPath: m_Name
       value: DemonBullet
@@ -138,6 +186,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: -4391009826084840758, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
+    - {fileID: 1235992055006175848, guid: 81e1cc047839871439dcf54e7e2a85b3, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

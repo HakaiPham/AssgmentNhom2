@@ -34,21 +34,11 @@ public class BulletPoolManager : MonoBehaviour
     }
     public void ReturnBullet(GameObject bullet)
     {
-        if (bullet == null)
-        {
-            Debug.LogError("Cannot return a null bullet to the pool.");
-            return;
-        }
-        Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.velocity = Vector3.zero; // Reset vận tốc
-            rb.angularVelocity = Vector3.zero; // Reset góc quay
-        }
-
-        bullet.transform.position = Vector3.zero; // Reset vị trí
-        bullet.transform.rotation = Quaternion.identity; // Reset hướng
-        bullet.SetActive(false); // Vô hiệu hóa đạn
-        bulletpool.Enqueue(bullet); // Đưa đạn trở lại queue
+        //if (bullet == null)
+        //{
+        //    Debug.LogError("Cannot return a null bullet to the pool.");
+        //    return;
+        bullet.SetActive(false); // Đặt trạng thái đạn về tắt
+        bulletpool.Enqueue(bullet); // Trả lại đạn vào pool
     }
 }

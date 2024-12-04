@@ -10,6 +10,9 @@ public class TimeLineStory : MonoBehaviour
     [SerializeField] private PlayableDirector _TimeLineHappyEnding;
     public Player _Player;
     public QuestNV2 _Quest;
+    bool _StopBadEnding = false;
+    bool _StopHappyEnding = false;
+    bool isStartTimeLine = false;
     void Start()
     {
         if (_TimeLineStartStory != null)
@@ -23,6 +26,7 @@ public class TimeLineStory : MonoBehaviour
             //Chạy theo thời gian thực 
             _TimeLineStartStory.timeUpdateMode = DirectorUpdateMode.UnscaledGameTime;
             Time.timeScale = 0f;
+            isStartTimeLine = true;
             _TimeLineStartStory.Play();
         }    
     }   
@@ -30,13 +34,21 @@ public class TimeLineStory : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        StartBadEnding();
-        StartHappyEnding();
+        if(!_StopBadEnding)
+        {
+            StartBadEnding();
+        }
+        if(!_StopHappyEnding)
+        {
+            StartHappyEnding();
+        }
         
     }
     private void EndStartStory(PlayableDirector director)
     {
         Time.timeScale = 1f;
+        isStartTimeLine = false;
+
     }
     private void StartBadEnding()
     {
@@ -46,11 +58,15 @@ public class TimeLineStory : MonoBehaviour
             _TimeLineBadEnding.timeUpdateMode = DirectorUpdateMode.UnscaledGameTime;
             Time.timeScale = 0f;
             _TimeLineBadEnding.Play();
+            _StopBadEnding = true;
+            isStartTimeLine = true;
         }
     }
     private void EndBadEnding(PlayableDirector director)
     {
         Time.timeScale = 1f;
+        isStartTimeLine = false;
+
     }
     private void StartHappyEnding()
     {
@@ -60,11 +76,19 @@ public class TimeLineStory : MonoBehaviour
             //Tránh việc bị chạy nhiều lần?
             _TimeLineHappyEnding.timeUpdateMode = DirectorUpdateMode.UnscaledGameTime;
             Time.timeScale = 0;
+            _StopHappyEnding = true;
             _TimeLineHappyEnding.Play();
+            isStartTimeLine = true;
+
         }
     }
     private void EndHappyEnding(PlayableDirector director)
     {
         Time.timeScale = 1f;
+        isStartTimeLine = false;
+    }
+    public bool CheckTimeLineStart()
+    {
+        return isStartTimeLine;
     }
 }
