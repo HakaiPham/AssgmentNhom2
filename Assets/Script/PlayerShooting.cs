@@ -22,98 +22,68 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private float _WaitFireBullet;
     public Coroutine _Coroutine;
     [SerializeField] private BulletPoolManager _BulletPoolManager;
-    Player player;
     bool _isReloading = false;
+    bool _CheckHitCollier = false;
+    bool canshoot = false;
     void Start()
     {
         _CooldownGunPanel.SetActive(false);
-        player = GetComponent<Player>();
     }
 
     // Update is called once per frame
     private void Update()
     {
-        PlayerShooter();
+        if (!canshoot)
+        {
+            PlayerShooter();
+        }
     }
     public void PlayerShooter()
     {
-        bool isDead = player.PlayerIsDead();
-        if (Input.GetMouseButtonDown(0) && bulletInBox != 0)
+        StartCoroutine(GunBullet());
+        if (bulletInBox <= 0 || Input.GetKeyDown(KeyCode.R))
         {
-            Ray ray = _maincamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
+            if (_Coroutine == null)
             {
-                //Huong ban
-                Vector3 target = hit.point;
-                Vector3 direction = (target - _tranformGun.position).normalized;
-                transform.rotation = Quaternion.LookRotation(direction);//Xoay Player theo hướng bắn
-                bool playerCooldownShoot = player.CanAttack();
-                if (playerCooldownShoot&&!_isReloading)
-                {
-                    CreateBullet(direction);
-                }
+                _Coroutine = StartCoroutine(ReloadBullet());
             }
-        }
-        if(!isDead)
-        {
-            StartCoroutine(GunBullet());
-        }
-    }
-    public void CreateBullet(Vector3 direction)
-    {
-        GameObject bullet = _BulletPoolManager.GetBullet();
-        if (bullet != null)
-        {
-            bullet.transform.position = _tranformGun.position;
-            bullet.transform.rotation = Quaternion.identity;
-            Rigidbody rb = bullet.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.velocity = direction * _speedBullet;
-                Debug.Log("Bullet velocity: " + rb.velocity);
-            }
-            else
-            {
-                Debug.LogWarning("No Rigidbody found on bullet!");
-            }
-            StartCoroutine(DeactivateBulletAfterTime(bullet, 3f));
-        }
-        else
-        {
-            Debug.LogWarning("No bullets available in pool!");
         }
     }
 
-    IEnumerator DeactivateBulletAfterTime(GameObject bullet, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        _BulletPoolManager.ReturnBullet(bullet);
-    }
+
     IEnumerator GunBullet()
     {
         //Đầu tiên sẽ có 30 viên đạn trong băng
         //Sau khi bắn sẽ trừ số đạn còn lại
         //Sau khi bắn hết đạn trong băng sẽ chạy thời gian reload đạn
         //Súng sẽ chuyển sang màu đen
-        if (bulletInBox <= 0||Input.GetKeyDown(KeyCode.R))
-        {
-            if (_Coroutine == null)
-            {
-                _Coroutine = StartCoroutine(ReloadBullet());
-                yield break;
-            }
-            else
-            {
-                yield break;
-            }
-        }
         if (Input.GetMouseButtonDown(0)&&!_isReloading)
         {
+            canshoot = true;
             bulletInBox--;
             bulletInBox = Mathf.Max(0, bulletInBox);
             _BulletBoxText.text = "" + bulletInBox + "/" + "∞";
+            Ray ray = _maincamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit))
+            {
+                // Đặt giá trị mặc định cho CheckHitCollider
+                Vector3 target = hit.point;
+                Vector3 direction = (target - _tranformGun.position).normalized;
+                transform.rotation = Quaternion.LookRotation(direction);
+                _CheckHitCollier = hit.collider.CompareTag("Enemy");
+                //  xoay nhân vật
+                if (_CheckHitCollier)
+                {
+                    //  xoay nhân vậ
+                    // Gây sát thương cho Enemy
+                    Enemy enemy = hit.collider.GetComponent<Enemy>();
+                    enemy?.TakeDame(Random.Range(20, 80)); // Gây sát thương ngẫu nhiên
+
+                }
+            }
             yield return new WaitForSeconds(_WaitFireBullet); //Chờ 1 frame để không bị gọi liên tục
+            canshoot = false;
         }
     }
     IEnumerator ReloadBullet()
@@ -147,5 +117,9 @@ public class PlayerShooting : MonoBehaviour
     public bool CheckGunIsReload()
     {
         return _isReloading;
+    }
+    public bool CheckHitColliderEnemy()
+    {
+        return _CheckHitCollier;
     }
 }

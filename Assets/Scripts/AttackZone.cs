@@ -10,7 +10,9 @@ public class AttackZone : MonoBehaviour
     
     public int damage;
     public string targetTag;
-    
+    [SerializeField] private Player player;
+
+    [SerializeField] private Enemy _enemy;  
     public List<Collider> list_Damage = new List<Collider>();
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -23,33 +25,26 @@ public class AttackZone : MonoBehaviour
         if (other.tag == targetTag && !list_Damage.Contains(other))
         {
             list_Damage.Add(other);
-            if (other.tag == "Player")
-            {
-                //other.GetComponent<PlayerMotor>().TakeDamage(damage);
-            }
-            
+            other.GetComponent<Player>().TakeDame(Random.Range(5, 11));
+
         }
     }
 
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.tag == targetTag && !list_Damage.Contains(other))
-        {
-            list_Damage.Add(other);
-            if (other.tag == "Player")
-            {
-                //other.GetComponent<PlayerMotor>().TakeDamage(damage);
-            }
-            
-        }
-    }
+    //private void OnTriggerStay(Collider other)
+    //{
+    //    if (other.tag == targetTag && !list_Damage.Contains(other))
+    //    {
+    //        list_Damage.Add(other);
+    //        other.GetComponent<Player>().TakeDame(Random.Range(5, 11));
+
+    //    }
+    //}
 
 
     public void beginDamage()
     {
         list_Damage.Clear();
         atkZone.enabled = true;
-        
     }
 
     public void endDamage()

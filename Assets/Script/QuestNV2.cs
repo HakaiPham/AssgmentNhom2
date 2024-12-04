@@ -24,7 +24,8 @@ public class QuestNV2 : MonoBehaviour
     [SerializeField] private Quest1 _Quest1;
     [SerializeField]
     private GameObject _PanelText2;
-    [SerializeField] private Rigidbody rb; 
+    [SerializeField] private Rigidbody rb;
+    bool _IsStartProssgressBar = false;
     void Start()
     {
         _PanelText2.SetActive(true);
@@ -131,6 +132,7 @@ public class QuestNV2 : MonoBehaviour
     {
         if(_QuantityCarMachine == 6)
         {
+            _IsStartProssgressBar = true;
             _QuantityText.color = Color.green;
             _PanelProgress.SetActive(true);
             while (true)
@@ -173,5 +175,9 @@ public class QuestNV2 : MonoBehaviour
     public bool CheckProgressMission()
     {
         return isfinishedMission;
+    }
+    public bool CheckProgressBarStart()
+    {
+        return _IsStartProssgressBar;
     }
 }
