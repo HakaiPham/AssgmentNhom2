@@ -6,26 +6,44 @@ public class BackGroundMusic : MonoBehaviour
 {
     // Start is called before the first frame update
     public TimeLineStory _TimeLine;
-    AudioSource _AudioSource;
-    bool _isPlaying = false;
+    public AudioSource _AudioSource;
+    public Player player;
+    float _SoundStarttime;
+    public float resetTime;
+    public AudioSource _ZombieAudioSource;
+    bool _IsPlayingBGMusic = false;
     void Start()
     {
-        _AudioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        bool _CheckTimeLine = _TimeLine.CheckTimeLineStart();
-        if (_CheckTimeLine&&!_isPlaying)
+        bool checkPlayerIsDead = player.PlayerIsDead();
+        if (checkPlayerIsDead)
         {
             _AudioSource.Stop();
-            _isPlaying = true;
+            _ZombieAudioSource.Stop();
+            Time.timeScale = 0;
         }
-        else if(!_CheckTimeLine&&_isPlaying)
+        bool _CheckTimeLine = _TimeLine.CheckTimeLineStart();
+        if (_CheckTimeLine)
         {
-            _AudioSource.Play();
-            _isPlaying = false;
+            _AudioSource.Stop();
+            _ZombieAudioSource.Stop();
+        }
+        else if(!_CheckTimeLine)
+        {
+            if (!_IsPlayingBGMusic)
+            {
+                _AudioSource.Play();
+                _IsPlayingBGMusic=true;
+            }
+            if (Time.time > _SoundStarttime)
+            {
+                _ZombieAudioSource.Play();
+                _SoundStarttime = Time.time + resetTime;
+            }
         }
     }
 }

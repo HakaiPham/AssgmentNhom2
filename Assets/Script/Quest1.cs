@@ -69,7 +69,7 @@ public class Quest1 : MonoBehaviour
 
                 // Log thông báo
                 _PanelNotice.SetActive(true);
-                _NoticeText.text = "Nguyên liệu thuốc đã xuất hiện: " + _CurrentObject.name;
+                _NoticeText.text = "Nguyên liệu thuốc đã xuất hiện";
             }
             while (_CurrentObject != null)
             {
