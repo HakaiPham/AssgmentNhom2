@@ -26,13 +26,18 @@ public class QuestNV2 : MonoBehaviour
     private GameObject _PanelText2;
     [SerializeField] private Rigidbody rb;
     bool _IsStartProssgressBar = false;
+    [SerializeField] private GameObject _CarGD1;//hiệu ứng của xe GD 1
+    [SerializeField] private GameObject _CarGD2;//Hiệu ứng xe giai đoạn 2
+    [SerializeField] private GameObject _PanelTextNotice;
+    [SerializeField] private TextMeshProUGUI _NoticeItemSpawn;
     void Start()
     {
         _PanelText2.SetActive(true);
         _PanelProgress.SetActive(false);
         StartCoroutine(Quest());
         rb = GetComponent<Rigidbody>();
-        rb.isKinematic = false;
+        rb.isKinematic = true;
+        _CarGD2.SetActive(false);
     }
 
     // Update is called once per frame
@@ -80,7 +85,8 @@ public class QuestNV2 : MonoBehaviour
                 currentObject = Instantiate(_CarMachine[randomIndex], spawnPosition, Quaternion.identity);
 
                 // Log thông báo
-                Debug.Log("Created new object: " + currentObject.name);
+                _PanelTextNotice.SetActive(true);
+                _NoticeItemSpawn.text = "Phụ kiện đã xuất hiện";
             }
             while (currentObject != null)
             {
@@ -88,7 +94,8 @@ public class QuestNV2 : MonoBehaviour
             }
 
             // Thêm một chút delay trước khi tạo object tiếp theo (nếu cần)
-             yield return new WaitForSeconds(_WaitItemSpawn);
+            _PanelTextNotice.SetActive(false);
+            yield return new WaitForSeconds(_WaitItemSpawn);
             Debug.Log("Đã Spawn");
         }
         Debug.Log("All items have been spawned.");
@@ -135,6 +142,7 @@ public class QuestNV2 : MonoBehaviour
             _IsStartProssgressBar = true;
             _QuantityText.color = Color.green;
             _PanelProgress.SetActive(true);
+            rb.isKinematic = true;
             while (true)
             {
                 if(_WaitFixCarProgress == 30)
@@ -167,8 +175,9 @@ public class QuestNV2 : MonoBehaviour
             Debug.Log("Đã va chạm");
             // Bắt đầu logic xử lý (không phụ thuộc việc thoát khỏi vùng va chạm).
             if (_QuantityCarMachine == 6)
-            {
+            {   _CarGD1.SetActive(false);
                 StartCoroutine(WaitCarFixed());
+                _CarGD2.SetActive(true);
             }
         }
     }

@@ -26,10 +26,13 @@ public class Player : MonoBehaviour
     public AudioClip _SoundWalk;
     bool _isStartSound = false;
     [SerializeField] private GameObject _VFXGunFire;
-    public TimeLineStory _timeLineStory; 
+    public TimeLineStory _timeLineStory;
+    [SerializeField] private AudioSource _GunAudioSource;
+    [SerializeField] private AudioSource _HitPlayerAudioSource;
+    [SerializeField] private GameObject _HitPanel;
     void Start()
     {
-        
+        _HitPanel.SetActive(false);
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         _CurrentHp = _MaxHp;
@@ -65,13 +68,14 @@ public class Player : MonoBehaviour
             // Kiểm tra trạng thái Animation Attack
             stateInfo = animator.GetCurrentAnimatorStateInfo(0);
 
-            if (stateInfo.IsName("Attack")&&stateInfo.normalizedTime>=1)
+            if (stateInfo.IsName("Attack"))
             {
                 EndAttack();
             }
         }
 
         // Di chuyển nhân vật
+
         characterController.Move(movement * Time.deltaTime);
     }
     public void Attack()
@@ -88,7 +92,7 @@ public class Player : MonoBehaviour
             if (!gunIsReloaded)
             {
                 _VFXGunFire.SetActive(true);
-                _AudioSource.PlayOneShot(_SoundGun);
+                _GunAudioSource.PlayOneShot(_SoundGun);
                 StartCoroutine(OffVFX());
             }
             ChangeState(CharacterState.Attack);
@@ -121,16 +125,23 @@ public class Player : MonoBehaviour
         Vector3 right =  mainCamera.transform.right;//Mặc định là trục  X
         forward.y = 0;//Chỉ di chuyển trên mặc đất không ảnh hướng đến chiều cao
         right.y = 0;
-
+        //Vector3 movement = new Vector3()
         movement = (forward * verticalInput + right * horizontalInput).normalized * speed;
-
-        bool _CheckHitCollider = playerShooting.CheckHitColliderEnemy();
         // Xoay hướng nhân vật
-        if (movement.magnitude > 0 && !Input.GetMouseButtonDown(0))//ưu tiên việc xoay nhân vật khi nhân vật di chuyển
+        if (movement.magnitude > 0)//ưu tiên việc xoay nhân vật khi nhân vật di chuyển
             //không thì xoay theo hướng bắn
         {
-            Quaternion toRotation = Quaternion.LookRotation(movement);
-            transform.rotation = toRotation;
+            transform.rotation = Quaternion.LookRotation(movement);
+            if (Input.GetMouseButtonDown(0))
+            {
+                _VFXGunFire.SetActive(true);
+                StartCoroutine(OffVFX());
+            }
+            if (stateInfo.IsName("Attack")&&movement.magnitude>0)
+            {
+                animator.SetTrigger("AttackToRun");
+            }
+            //transform.rotation = toRotation;
             animator.SetBool("Run", true);
             if (!_AudioSource.isPlaying)
             {
@@ -149,11 +160,7 @@ public class Player : MonoBehaviour
         {
             case CharacterState.Normal:break;
             case CharacterState.Attack:
-                if (animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
-                {
-                    animator.ResetTrigger("EndAttack");
-                }
-                animator.SetTrigger("Attack");
+                animator.SetBool("Attack", true);
                 break;
             case CharacterState.Dead: break;
         }
@@ -161,22 +168,37 @@ public class Player : MonoBehaviour
     }
     public void EndAttack()
     {
-        animator.SetTrigger("EndAttack");
+        animator.SetBool("Attack", false);
         isAttack = false;
         ChangeState(CharacterState.Normal);
     }
     public void TakeDame(int dame)
     {
         _CurrentHp -= dame;
+        if (!_HitPlayerAudioSource.isPlaying)
+        {
+            _HitPanel.SetActive(true);
+            _HitPlayerAudioSource.Play();
+            StartCoroutine(OffHitPanel());
+        }
         _CurrentHp = Mathf.Max(0, _CurrentHp);
         _SliderHealth.value = _CurrentHp;
         if(_CurrentHp <= 0)
         {
+            _HitPlayerAudioSource.Stop();
+            _AudioSource.Stop();
+            _GunAudioSource.Stop();
+            _HitPanel.SetActive(false);
             isDead = true;
             ChangeState(CharacterState.Dead);
             _PanelDead.SetActive(true);
             Debug.Log("Character Die");
         }
+    }
+    IEnumerator OffHitPanel()//Event
+    {
+        yield return new WaitForSeconds(0.5f);
+        _HitPanel.SetActive(false);
     }
     public bool PlayerIsDead()
     {

@@ -11,6 +11,7 @@ public class SpawnEnemy : MonoBehaviour
      [SerializeField] private QuestNV2 _QuestNV2;
     Coroutine _Coroutine;
     [SerializeField] private float minDistance;
+    bool _ChangeMaxEnemyOnScreen = false;//Biến bool xác định chỉ chạy 1 lần
     void Start()
     {
         _CurrentQuantityEnemy = new List<GameObject>();
@@ -20,7 +21,15 @@ public class SpawnEnemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(!_ChangeMaxEnemyOnScreen)
+        {
+            bool checkProgressBarMission2 = _QuestNV2.CheckProgressBarStart();
+            if (checkProgressBarMission2)
+            {
+                _MaxEnemyOnScreen = 11;
+                _ChangeMaxEnemyOnScreen = true;
+            }
+        }
     }
     public void CheckDkSpawn()//Hàm chạy Coroutine sẽ chạy lại khi Enemy bị tiêu diệt
     {
@@ -48,7 +57,7 @@ public class SpawnEnemy : MonoBehaviour
             Vector3 postionEnemy = RandomPositionSpawn();
             GameObject enemySpawn = Instantiate(_enemy[randomEnemySpawn], postionEnemy, Quaternion.identity);
             _CurrentQuantityEnemy.Add(enemySpawn);
-            yield return new WaitForSeconds(Random.Range(1f, 2f));
+            yield return new WaitForSeconds(Random.Range(0.5f,1f));
         }
 
         _Coroutine = null;
@@ -65,7 +74,7 @@ public class SpawnEnemy : MonoBehaviour
         do
         {
             attempts++;
-            int random = Random.Range(0, 5);
+            int random = Random.Range(0,4);
             switch (random)
             {
                 case 0: position = new Vector3(473f, 0.2000008f, 391f); break;

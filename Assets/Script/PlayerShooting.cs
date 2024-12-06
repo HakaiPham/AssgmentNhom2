@@ -25,6 +25,8 @@ public class PlayerShooting : MonoBehaviour
     bool _isReloading = false;
     bool _CheckHitCollier = false;
     bool canshoot = false;
+    public AudioClip _ReloadGunSound;
+    public AudioSource _AudioSource;
     void Start()
     {
         _CooldownGunPanel.SetActive(false);
@@ -70,6 +72,7 @@ public class PlayerShooting : MonoBehaviour
                 // Đặt giá trị mặc định cho CheckHitCollider
                 Vector3 target = hit.point;
                 Vector3 direction = (target - _tranformGun.position).normalized;
+                direction.y = 0f;//Giữ nhân vật không xoay theo trục y
                 transform.rotation = Quaternion.LookRotation(direction);
                 _CheckHitCollier = hit.collider.CompareTag("Enemy");
                 //  xoay nhân vật
@@ -96,7 +99,8 @@ public class PlayerShooting : MonoBehaviour
         _isReloading = true;
         _CooldownGunPanel.SetActive(true);
         _GunImage.color = Color.black;
-        for (int i = 0; i < 5; i++) // Ví dụ reload trong 3 giây
+        _AudioSource.PlayOneShot(_ReloadGunSound);
+        for (int i = 0; i < 3; i++) // Ví dụ reload trong 3 giây
         {
             _TimeGunReload--;
             _TimeGunReload = Mathf.Max(0, _TimeGunReload);
@@ -105,7 +109,7 @@ public class PlayerShooting : MonoBehaviour
         }
         if (_TimeGunReload == 0)
         {
-            _TimeGunReload = 5;//Đặt lại thời gian
+            _TimeGunReload = 3;//Đặt lại thời gian
             bulletInBox = 30;
             _BulletBoxText.text = "" + bulletInBox + "/" + "∞";
             _CooldownGunPanel.SetActive(false);
